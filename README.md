@@ -1,58 +1,285 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🏆 Meu Campeonato
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+API REST para simulação de campeonatos de futebol eliminatórios, desenvolvida em Laravel com PostgreSQL.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Sobre o Projeto
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+O **Meu Campeonato** simula campeonatos eliminatórios de futebol de bairro. O sistema gerencia 8 times em um chaveamento que começa nas quartas de final, passa pelas semifinais, disputa do 3º lugar e final.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+O placar de cada partida é gerado por um script Python (`teste.py`), simulando uma chamada a um modelo de inteligência artificial externo.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Pré-requisitos
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Com Docker (recomendado)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop) 24+
+- [Git](https://git-scm.com/)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Sem Docker
+- PHP 8.4+
+- Composer 2+
+- PostgreSQL 14+
+- Python 3+
+- Git
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🚀 Instalação e Execução
 
+### ✅ Com Docker (recomendado)
+
+**1. Clone o repositório:**
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/LCamposDev/meu-campeonato.git
+cd meu-campeonato
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+**2. Copie o arquivo de variáveis de ambiente:**
+```bash
+cp .env.example .env
+```
 
-## Contributing
+**3. Configure o `.env`** (as variáveis do banco já vêm preenchidas para o Docker):
+```env
+DB_CONNECTION=pgsql
+DB_HOST=db
+DB_PORT=5432
+DB_DATABASE=meu-campeonato
+DB_USERNAME=postgres
+DB_PASSWORD=admin
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**4. Suba os containers:**
+```bash
+docker compose up -d --build
+```
 
-## Code of Conduct
+**5. Gere a chave da aplicação:**
+```bash
+docker compose exec app php artisan key:generate
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**6. Rode as migrations:**
+```bash
+docker compose exec app php artisan migrate
+```
 
-## Security Vulnerabilities
+**7. Acesse a API:**
+```
+http://localhost:8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### 💻 Sem Docker
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**1. Clone o repositório:**
+```bash
+git clone https://github.com/LCamposDev/meu-campeonato.git
+cd meu-campeonato
+```
+
+**2. Instale as dependências:**
+```bash
+composer install
+```
+
+**3. Copie o arquivo de variáveis de ambiente:**
+```bash
+cp .env.example .env
+```
+
+**4. Configure o `.env`:**
+```env
+DB_CONNECTION=pgsql
+DB_HOST=localhost
+DB_PORT=5432
+DB_DATABASE=meu-campeonato
+DB_USERNAME=postgres
+DB_PASSWORD=sua_senha
+```
+
+**5. Crie o banco de dados no PostgreSQL:**
+```bash
+psql -U postgres -c "CREATE DATABASE \"meu-campeonato\";"
+```
+
+**6. Gere a chave da aplicação:**
+```bash
+php artisan key:generate
+```
+
+**7. Rode as migrations:**
+```bash
+php artisan migrate
+```
+
+**8. Inicie o servidor:**
+```bash
+php artisan serve
+```
+
+**9. Acesse a API:**
+```
+http://localhost:8000
+```
+
+---
+
+## ⚙️ Variáveis de Ambiente
+
+| Variável | Descrição | Padrão (Docker) |
+|----------|-----------|-----------------|
+| `APP_NAME` | Nome da aplicação | `MeuCampeonato` |
+| `APP_ENV` | Ambiente | `local` |
+| `APP_DEBUG` | Modo debug | `true` |
+| `DB_CONNECTION` | Driver do banco | `pgsql` |
+| `DB_HOST` | Host do banco | `db` |
+| `DB_PORT` | Porta do banco | `5432` |
+| `DB_DATABASE` | Nome do banco | `meu-campeonato` |
+| `DB_USERNAME` | Usuário do banco | `postgres` |
+| `DB_PASSWORD` | Senha do banco | `admin` |
+
+---
+
+## 🧪 Rodando os Testes
+
+### Com Docker:
+```bash
+# Todos os testes
+docker compose exec app php artisan test
+
+# Apenas testes unitários
+docker compose exec app php artisan test --testsuite=Unit
+
+# Apenas testes de integração
+docker compose exec app php artisan test --testsuite=Feature
+```
+
+### Sem Docker:
+```bash
+# Todos os testes
+php artisan test
+
+# Apenas testes unitários
+php artisan test --testsuite=Unit
+
+# Apenas testes de integração
+php artisan test --testsuite=Feature
+```
+
+---
+
+## 🐍 Script Python
+
+O placar de cada partida é gerado pelo script `teste.py` localizado na raiz do projeto. Para testá-lo manualmente:
+
+```bash
+python3 teste.py
+```
+
+Exemplo de output:
+```
+3
+1
+```
+
+> O back-end executa esse script automaticamente durante a simulação de cada partida.
+
+---
+
+## 🐳 Comandos Docker Úteis
+
+```bash
+# Subir os containers
+docker compose up -d
+
+# Parar os containers
+docker compose down
+
+# Ver logs da aplicação
+docker compose logs app
+
+# Acessar o container da aplicação
+docker compose exec app bash
+
+# Rodar migrations
+docker compose exec app php artisan migrate
+
+# Reverter migrations
+docker compose exec app php artisan migrate:rollback
+
+# Acessar o banco de dados
+docker compose exec db psql -U postgres -d meu-campeonato
+```
+
+---
+
+## 📡 Endpoints da API
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/api/teams` | Lista todos os times |
+| `POST` | `/api/teams` | Cadastra um novo time |
+| `GET` | `/api/championships` | Lista campeonatos anteriores |
+| `POST` | `/api/championships` | Cria um novo campeonato |
+| `GET` | `/api/championships/{id}` | Consulta um campeonato |
+| `POST` | `/api/championships/{id}/simulate` | Simula o campeonato |
+
+> A collection completa do Postman está disponível em `/docs/meu-campeonato.postman_collection.json`
+
+---
+
+## 🏗️ Estrutura do Projeto
+
+```
+meu-campeonato/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── TeamController.php
+│   │   │   └── ChampionshipController.php
+│   │   ├── Requests/
+│   │   └── Resources/
+│   ├── Models/
+│   │   ├── Team.php
+│   │   ├── Championship.php
+│   │   └── Match.php
+│   └── Services/
+│       ├── ScoreGeneratorService.php
+│       └── ChampionshipService.php
+├── database/
+│   └── migrations/
+├── docker/
+│   └── nginx/
+│       └── nginx.conf
+├── routes/
+│   └── api.php
+├── tests/
+│   ├── Unit/
+│   └── Feature/
+├── teste.py
+├── Dockerfile
+└── docker-compose.yml
+```
+
+---
+
+## 📦 Tecnologias
+
+- **PHP 8.5** + **Laravel 13**
+- **PostgreSQL 16**
+- **Nginx** (servidor web)
+- **Docker** + **Docker Compose**
+- **Python 3** (geração de placares)
+- **PHPUnit** (testes)
+
+---
+
+## 👨‍💻 Autor
+
+**LCamposDev**  
+[github.com/LCamposDev](https://github.com/LCamposDev)
