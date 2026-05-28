@@ -8,6 +8,10 @@ use Illuminate\Support\Collection;
 
 class TiebreakResolver
 {
+    public function __construct(
+        private ScoreGeneratorService $scoreGenerator
+    ) {}
+
     public function resolve(GameMatch $match, Championship $championship): int
     {
         if ($match->home_score > $match->away_score) {
@@ -16,6 +20,16 @@ class TiebreakResolver
 
         if ($match->away_score > $match->home_score) {
             return $match->away_team_id;
+        }
+
+        $penalties = $this->scoreGenerator->generatePenalties();
+        $match->home_penalties = $penalties['home'];
+        $match->away_penalties = $penalties['away'];
+
+        if ($match->home_penalties !== $match->away_penalties) {
+            return $match->home_penalties > $match->away_penalties
+                ? $match->home_team_id
+                : $match->away_team_id;
         }
 
         $homePoints = $this->getAccumulatedScore($match->home_team_id, $championship);

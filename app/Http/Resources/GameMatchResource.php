@@ -10,13 +10,15 @@ class GameMatchResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'phase' => $this->phase->value,
+            'id'    => $this->id,
+            'phase' => $this->phase,
             'home_team' => new TeamResource($this->homeTeam),
             'away_team' => new TeamResource($this->awayTeam),
-            'home_score' => $this->home_score,
-            'away_score' => $this->away_score,
-            'winner' => new TeamResource($this->whenLoaded('winner')),
+            'home_score'    => $this->home_score,
+            'away_score'    => $this->away_score,
+            'home_penalties'    => $this->home_penalties,
+            'away_penalties'    => $this->away_penalties,
+            'winner'    => new TeamResource($this->whenLoaded('winner')),
         ];
     }
 }

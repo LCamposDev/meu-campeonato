@@ -18,6 +18,8 @@ class GameMatch extends Model
         'away_team_id',
         'home_score',
         'away_score',
+        'home_penalties',
+        'away_penalties',
         'winner_id',
     ];
 

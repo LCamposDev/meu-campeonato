@@ -23,7 +23,8 @@ class BracketGenerationTest extends TestCase
         parent::setUp();
 
         $scoreGenerator = $this->createMock(ScoreGeneratorService::class);
-        $this->service = new ChampionshipService($scoreGenerator, new TiebreakResolver);
+        $tiebreakResolver = new TiebreakResolver($scoreGenerator);
+        $this->service = new ChampionshipService($scoreGenerator, $tiebreakResolver);
     }
 
     public function test_bracket_generates_four_matches_for_eight_teams(): void
@@ -53,7 +54,7 @@ class BracketGenerationTest extends TestCase
             ->where('phase', MatchPhase::Quarterfinal)
             ->get();
 
-        $teamIds = $matches->flatMap(fn ($m) => [$m->home_team_id, $m->away_team_id]);
+        $teamIds = $matches->flatMap(fn($m) => [$m->home_team_id, $m->away_team_id]);
 
         $this->assertEquals($teamIds->count(), $teamIds->unique()->count());
     }
@@ -70,7 +71,7 @@ class BracketGenerationTest extends TestCase
             ->where('phase', MatchPhase::Quarterfinal)
             ->get();
 
-        $usedTeamIds = $matches->flatMap(fn ($m) => [$m->home_team_id, $m->away_team_id])->unique()->sort()->values();
+        $usedTeamIds = $matches->flatMap(fn($m) => [$m->home_team_id, $m->away_team_id])->unique()->sort()->values();
         $expectedIds = $teams->pluck('id')->sort()->values();
 
         $this->assertEquals($expectedIds, $usedTeamIds);

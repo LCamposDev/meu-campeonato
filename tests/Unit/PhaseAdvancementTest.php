@@ -24,8 +24,10 @@ class PhaseAdvancementTest extends TestCase
 
         $scoreGenerator = $this->createMock(ScoreGeneratorService::class);
         $scoreGenerator->method('generate')->willReturn(['home' => 2, 'away' => 1]);
+        $scoreGenerator->method('generatePenalties')->willReturn(['home' => 5, 'away' => 3]);
 
-        $this->service = new ChampionshipService($scoreGenerator, new TiebreakResolver);
+        $tiebreakResolver = new TiebreakResolver($scoreGenerator);
+        $this->service = new ChampionshipService($scoreGenerator, $tiebreakResolver);
     }
 
     public function test_championship_is_finished_after_simulation(): void
@@ -51,7 +53,7 @@ class PhaseAdvancementTest extends TestCase
 
         $phases = $championship->matches()
             ->pluck('phase')
-            ->map(fn (MatchPhase $phase) => $phase->value)
+            ->map(fn(MatchPhase $phase) => $phase->value)
             ->unique()
             ->sort()
             ->values()
