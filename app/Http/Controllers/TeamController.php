@@ -8,13 +8,6 @@ use App\Models\Team;
 
 class TeamController extends Controller
 {
-    public function index()
-    {
-        $teams = Team::orderBy('created_at')->get();
-
-        return TeamResource::collection($teams);
-    }
-
     public function store(StoreTeamRequest $request)
     {
         $team = Team::create($request->validated());
