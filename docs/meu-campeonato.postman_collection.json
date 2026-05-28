@@ -1,429 +1,550 @@
 {
 	"info": {
-		"_postman_id": "meu-campeonato-api",
-		"name": "Meu Campeonato API",
-		"description": "Collection da API REST do projeto Meu Campeonato.\n\n## Fluxo sugerido\n1. Cadastre 8 times (`POST /api/teams`)\n2. Crie o campeonato com os IDs (`POST /api/championships`)\n3. Simule o campeonato (`POST /api/championships/{id}/simulate`)\n4. Consulte o resultado (`GET /api/championships/{id}`)\n\nVariáveis da collection:\n- `baseUrl` — URL base (padrão: http://localhost:8000)\n- `championshipId` — preenchido automaticamente ao criar um campeonato",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	  "_postman_id": "meu-campeonato-api",
+	  "name": "Meu Campeonato API",
+	  "description": "Collection da API REST do projeto Meu Campeonato.\n\n## Fluxo sugerido\n1. Cadastre 8 times (`POST /api/teams`)\n2. Crie o campeonato com os IDs (`POST /api/championships`)\n3. Simule o campeonato (`POST /api/championships/{id}/simulate`)\n4. Consulte o resultado (`GET /api/championships/{id}`)\n\nCritério de desempate:\n1. Pênaltis (3-5 cobranças)\n2. Pontuação acumulada (gols marcados - sofridos)\n3. Ordem de inscrição\n\nVariáveis da collection:\n- `baseUrl` — URL base (padrão: http://localhost:8000)\n- `championshipId` — preenchido automaticamente ao criar um campeonato",
+	  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:8000"
-		},
-		{
-			"key": "championshipId",
-			"value": "1"
-		}
+	  {
+		"key": "baseUrl",
+		"value": "http://localhost:8000"
+	  },
+	  {
+		"key": "championshipId",
+		"value": "1"
+	  }
 	],
 	"item": [
-		{
-			"name": "Utilitários",
-			"item": [
+	  {
+		"name": "Utilitários",
+		"item": [
+		  {
+			"name": "Status da API",
+			"request": {
+			  "method": "GET",
+			  "header": [
 				{
-					"name": "Status da API",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": "{{baseUrl}}/"
-					},
-					"response": []
-				},
-				{
-					"name": "Health Check",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": "{{baseUrl}}/up"
-					},
-					"response": []
+				  "key": "Accept",
+				  "value": "application/json"
 				}
-			]
-		},
-		{
-			"name": "Times",
-			"item": [
+			  ],
+			  "url": "{{baseUrl}}/"
+			},
+			"response": []
+		  },
+		  {
+			"name": "Health Check",
+			"request": {
+			  "method": "GET",
+			  "header": [
 				{
-					"name": "Cadastrar time",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Flamengo\"\n}"
-						},
-						"url": "{{baseUrl}}/api/teams",
-						"description": "Cadastra um novo time. Repita até ter 8 times antes de criar o campeonato."
-					},
-					"response": []
-				},
-				{
-					"name": "Cadastrar time (sem nome) — erro 422",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{}"
-						},
-						"url": "{{baseUrl}}/api/teams",
-						"description": "Exemplo de validação: nome obrigatório."
-					},
-					"response": []
+				  "key": "Accept",
+				  "value": "application/json"
 				}
-			]
-		},
-		{
-			"name": "Campeonatos",
-			"item": [
+			  ],
+			  "url": "{{baseUrl}}/up"
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Times",
+		"item": [
+		  {
+			"name": "Cadastrar time",
+			"request": {
+			  "method": "POST",
+			  "header": [
 				{
-					"name": "Criar campeonato",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    const body = pm.response.json();",
-									"    if (body.data && body.data.id) {",
-									"        pm.collectionVariables.set('championshipId', body.data.id);",
-									"        console.log('championshipId definido como:', body.data.id);",
-									"    }",
-									"}",
-									"",
-									"pm.test('Status 201', () => pm.response.to.have.status(201));",
-									"pm.test('Campeonato pendente', () => {",
-									"    pm.expect(pm.response.json().data.status).to.eql('pending');",
-									"});",
-									"pm.test('Quartas de final geradas', () => {",
-									"    pm.expect(pm.response.json().data.phases.quarterfinal).to.have.lengthOf(4);",
-									"});"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
-						},
-						"url": "{{baseUrl}}/api/championships",
-						"description": "Cria um campeonato com exatamente 8 times e gera o chaveamento das quartas de final.\n\nAjuste os IDs conforme os times cadastrados."
-					},
-					"response": []
+				  "key": "Accept",
+				  "value": "application/json"
 				},
 				{
-					"name": "Criar campeonato (5 times) — erro 422",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5]\n}"
-						},
-						"url": "{{baseUrl}}/api/championships",
-						"description": "Exemplo de validação: o campeonato deve ter exatamente 8 times."
-					},
-					"response": []
-				},
-				{
-					"name": "Listar campeonatos",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/championships?page=1",
-							"host": ["{{baseUrl}}"],
-							"path": ["api", "championships"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Paginação (15 por página)"
-								}
-							]
-						},
-						"description": "Lista campeonatos anteriores com paginação."
-					},
-					"response": []
-				},
-				{
-					"name": "Consultar campeonato",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": "{{baseUrl}}/api/championships/{{championshipId}}",
-						"description": "Retorna times, partidas por fase e resultado (1º a 4º) quando finalizado."
-					},
-					"response": []
-				},
-				{
-					"name": "Simular campeonato",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"pm.test('Status 200', () => pm.response.to.have.status(200));",
-									"pm.test('Campeonato finalizado', () => {",
-									"    pm.expect(pm.response.json().data.status).to.eql('finished');",
-									"});",
-									"pm.test('Resultado com pódio', () => {",
-									"    const result = pm.response.json().data.result;",
-									"    pm.expect(result).to.have.property('1st');",
-									"    pm.expect(result).to.have.property('2nd');",
-									"    pm.expect(result).to.have.property('3rd');",
-									"    pm.expect(result).to.have.property('4th');",
-									"});"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate",
-						"description": "Simula todas as fases do campeonato (quartas, semis, 3º lugar e final) usando o script Python `teste.py` para gerar os placares."
-					},
-					"response": []
-				},
-				{
-					"name": "Simular campeonato novamente — erro 422",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate",
-						"description": "Exemplo de erro: campeonato já simulado."
-					},
-					"response": []
+				  "key": "Content-Type",
+				  "value": "application/json"
 				}
-			]
-		},
-		{
-			"name": "Fluxo completo",
-			"description": "Execute as requisições nesta ordem (use o Runner do Postman).",
-			"item": [
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Flamengo\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams",
+			  "description": "Cadastra um novo time. Repita até ter 8 times antes de criar o campeonato."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Cadastrar time (sem nome) — erro 422",
+			"request": {
+			  "method": "POST",
+			  "header": [
 				{
-					"name": "1. Cadastrar time — Flamengo",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Flamengo\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
+				  "key": "Accept",
+				  "value": "application/json"
 				},
 				{
-					"name": "2. Cadastrar time — Palmeiras",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Palmeiras\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "3. Cadastrar time — Corinthians",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Corinthians\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "4. Cadastrar time — São Paulo",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"São Paulo\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "5. Cadastrar time — Santos",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Santos\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "6. Cadastrar time — Grêmio",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Grêmio\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "7. Cadastrar time — Internacional",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Internacional\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "8. Cadastrar time — Atlético-MG",
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {"mode": "raw", "raw": "{\n    \"name\": \"Atlético-MG\"\n}"},
-						"url": "{{baseUrl}}/api/teams"
-					},
-					"response": []
-				},
-				{
-					"name": "9. Criar campeonato",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"type": "text/javascript",
-								"exec": [
-									"if (pm.response.code === 201) {",
-									"    pm.collectionVariables.set('championshipId', pm.response.json().data.id);",
-									"}"
-								]
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{"key": "Accept", "value": "application/json"},
-							{"key": "Content-Type", "value": "application/json"}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
-						},
-						"url": "{{baseUrl}}/api/championships"
-					},
-					"response": []
-				},
-				{
-					"name": "10. Simular campeonato",
-					"request": {
-						"method": "POST",
-						"header": [{"key": "Accept", "value": "application/json"}],
-						"url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate"
-					},
-					"response": []
-				},
-				{
-					"name": "11. Consultar resultado",
-					"request": {
-						"method": "GET",
-						"header": [{"key": "Accept", "value": "application/json"}],
-						"url": "{{baseUrl}}/api/championships/{{championshipId}}"
-					},
-					"response": []
+				  "key": "Content-Type",
+				  "value": "application/json"
 				}
-			]
-		}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{}"
+			  },
+			  "url": "{{baseUrl}}/api/teams",
+			  "description": "Exemplo de validação: nome obrigatório."
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Campeonatos",
+		"item": [
+		  {
+			"name": "Criar campeonato",
+			"event": [
+			  {
+				"listen": "test",
+				"script": {
+				  "type": "text/javascript",
+				  "exec": [
+					"if (pm.response.code === 201) {",
+					"    const body = pm.response.json();",
+					"    if (body.data && body.data.id) {",
+					"        pm.collectionVariables.set('championshipId', body.data.id);",
+					"        console.log('championshipId definido como:', body.data.id);",
+					"    }",
+					"}",
+					"",
+					"pm.test('Status 201', () => pm.response.to.have.status(201));",
+					"pm.test('Campeonato pendente', () => {",
+					"    pm.expect(pm.response.json().data.status).to.eql('pending');",
+					"});",
+					"pm.test('Quartas de final geradas', () => {",
+					"    pm.expect(pm.response.json().data.phases.quarterfinal).to.have.lengthOf(4);",
+					"});"
+				  ]
+				}
+			  }
+			],
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
+			  },
+			  "url": "{{baseUrl}}/api/championships",
+			  "description": "Cria um campeonato com exatamente 8 times e gera o chaveamento das quartas de final.\n\nAjuste os IDs conforme os times cadastrados."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Criar campeonato (5 times) — erro 422",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5]\n}"
+			  },
+			  "url": "{{baseUrl}}/api/championships",
+			  "description": "Exemplo de validação: o campeonato deve ter exatamente 8 times."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Listar campeonatos",
+			"request": {
+			  "method": "GET",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": {
+				"raw": "{{baseUrl}}/api/championships?page=1",
+				"host": [
+				  "{{baseUrl}}"
+				],
+				"path": [
+				  "api",
+				  "championships"
+				],
+				"query": [
+				  {
+					"key": "page",
+					"value": "1",
+					"description": "Paginação (15 por página)"
+				  }
+				]
+			  },
+			  "description": "Lista campeonatos anteriores com paginação."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Consultar campeonato",
+			"request": {
+			  "method": "GET",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": "{{baseUrl}}/api/championships/{{championshipId}}",
+			  "description": "Retorna times, partidas por fase e resultado (1º a 4º) quando finalizado."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Simular campeonato",
+			"event": [
+			  {
+				"listen": "test",
+				"script": {
+				  "type": "text/javascript",
+				  "exec": [
+					"pm.test('Status 200', () => pm.response.to.have.status(200));",
+					"pm.test('Campeonato finalizado', () => {",
+					"    pm.expect(pm.response.json().data.status).to.eql('finished');",
+					"});",
+					"pm.test('Resultado com pódio', () => {",
+					"    const result = pm.response.json().data.result;",
+					"    pm.expect(result).to.have.property('1st');",
+					"    pm.expect(result).to.have.property('2nd');",
+					"    pm.expect(result).to.have.property('3rd');",
+					"    pm.expect(result).to.have.property('4th');",
+					"});",
+					"pm.test('Partidas com campo de pênaltis', () => {",
+					"    const phases = pm.response.json().data.phases;",
+					"    const allMatches = [",
+					"        ...phases.quarterfinal,",
+					"        ...phases.semifinal,",
+					"        ...phases.third_place,",
+					"        ...phases.final",
+					"    ];",
+					"    allMatches.forEach(match => {",
+					"        pm.expect(match).to.have.property('home_penalties');",
+					"        pm.expect(match).to.have.property('away_penalties');",
+					"    });",
+					"});",
+					"pm.test('Pênaltis presentes em empates', () => {",
+					"    const phases = pm.response.json().data.phases;",
+					"    const allMatches = [",
+					"        ...phases.quarterfinal,",
+					"        ...phases.semifinal,",
+					"        ...phases.third_place,",
+					"        ...phases.final",
+					"    ];",
+					"    allMatches.forEach(match => {",
+					"        if (match.home_score === match.away_score) {",
+					"            pm.expect(match.home_penalties).to.not.be.null;",
+					"            pm.expect(match.away_penalties).to.not.be.null;",
+					"        }",
+					"    });",
+					"});"
+				  ]
+				}
+			  }
+			],
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate",
+			  "description": "Simula todas as fases do campeonato (quartas, semis, 3º lugar e final) usando o script Python `teste.py` para gerar os placares."
+			},
+			"response": []
+		  },
+		  {
+			"name": "Simular campeonato novamente — erro 422",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate",
+			  "description": "Exemplo de erro: campeonato já simulado."
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Fluxo completo",
+		"description": "Execute as requisições nesta ordem (use o Runner do Postman).",
+		"item": [
+		  {
+			"name": "1. Cadastrar time — Flamengo",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Flamengo\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "2. Cadastrar time — Palmeiras",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Palmeiras\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "3. Cadastrar time — Corinthians",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Corinthians\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "4. Cadastrar time — São Paulo",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"São Paulo\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "5. Cadastrar time — Santos",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Santos\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "6. Cadastrar time — Grêmio",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Grêmio\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "7. Cadastrar time — Internacional",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Internacional\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "8. Cadastrar time — Atlético-MG",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Atlético-MG\"\n}"
+			  },
+			  "url": "{{baseUrl}}/api/teams"
+			},
+			"response": []
+		  },
+		  {
+			"name": "9. Criar campeonato",
+			"event": [
+			  {
+				"listen": "test",
+				"script": {
+				  "type": "text/javascript",
+				  "exec": [
+					"if (pm.response.code === 201) {",
+					"    pm.collectionVariables.set('championshipId', pm.response.json().data.id);",
+					"}"
+				  ]
+				}
+			  }
+			],
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				},
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"team_ids\": [1, 2, 3, 4, 5, 6, 7, 8]\n}"
+			  },
+			  "url": "{{baseUrl}}/api/championships"
+			},
+			"response": []
+		  },
+		  {
+			"name": "10. Simular campeonato",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": "{{baseUrl}}/api/championships/{{championshipId}}/simulate"
+			},
+			"response": []
+		  },
+		  {
+			"name": "11. Consultar resultado",
+			"request": {
+			  "method": "GET",
+			  "header": [
+				{
+				  "key": "Accept",
+				  "value": "application/json"
+				}
+			  ],
+			  "url": "{{baseUrl}}/api/championships/{{championshipId}}"
+			},
+			"response": []
+		  }
+		]
+	  }
 	]
-}
+  }
