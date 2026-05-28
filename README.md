@@ -48,8 +48,8 @@ DB_CONNECTION=pgsql
 DB_HOST=db
 DB_PORT=5432
 DB_DATABASE=meu-campeonato
-DB_USERNAME=postgres
-DB_PASSWORD=admin
+DB_USERNAME=seu_username
+DB_PASSWORD=sua_senha
 ```
 
 **4. Suba os containers:**
@@ -237,7 +237,14 @@ docker compose exec db psql -U postgres -d meu-campeonato
 | `GET` | `/api/championships/{id}` | Consulta um campeonato |
 | `POST` | `/api/championships/{id}/simulate` | Simula o campeonato |
 
-> A collection completa do Postman está disponível em `/docs/meu-campeonato.postman_collection.json`
+### Importar no Postman
+
+1. Abra o Postman → **Import**
+2. Selecione os arquivos em `docs/`:
+   - `meu-campeonato.postman_collection.json` — collection com todos os endpoints
+   - `meu-campeonato.postman_environment.json` — ambiente local (`http://localhost:8000`)
+3. Ative o environment **Meu Campeonato — Local (Docker)**
+4. Para testar o fluxo inteiro, use a pasta **Fluxo completo** com o **Collection Runner**
 
 ---
 
