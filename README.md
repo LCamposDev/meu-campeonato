@@ -69,8 +69,10 @@ docker compose exec app php artisan migrate
 
 **7. Acesse a API:**
 ```
-http://localhost:8000
+http://localhost:8000/api/teams
 ```
+
+Health check: `GET http://localhost:8000/up`
 
 ---
 
@@ -124,8 +126,10 @@ php artisan serve
 
 **9. Acesse a API:**
 ```
-http://localhost:8000
+http://localhost:8000/api/teams
 ```
+
+Health check: `GET http://localhost:8000/up`
 
 ---
 
@@ -142,6 +146,9 @@ http://localhost:8000
 | `DB_DATABASE` | Nome do banco | `meu-campeonato` |
 | `DB_USERNAME` | Usuário do banco | `postgres` |
 | `DB_PASSWORD` | Senha do banco | `admin` |
+| `SCORE_GENERATOR_PYTHON` | Binário do Python | `python3` |
+| `SCORE_GENERATOR_SCRIPT` | Caminho do script (vazio = `teste.py` na raiz) | — |
+| `SCORE_GENERATOR_FALLBACK` | Placar aleatório se o script falhar | `false` |
 
 ---
 
@@ -222,7 +229,8 @@ docker compose exec db psql -U postgres -d meu-campeonato
 
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
-| `GET` | `/api/teams` | Lista todos os times |
+| `GET` | `/` | Status da API (JSON) |
+| `GET` | `/up` | Health check do Laravel |
 | `POST` | `/api/teams` | Cadastra um novo time |
 | `GET` | `/api/championships` | Lista campeonatos anteriores |
 | `POST` | `/api/championships` | Cria um novo campeonato |
@@ -247,17 +255,21 @@ meu-campeonato/
 │   ├── Models/
 │   │   ├── Team.php
 │   │   ├── Championship.php
-│   │   └── Match.php
+│   │   └── GameMatch.php
+│   ├── Enums/
+│   ├── Exceptions/
 │   └── Services/
+│       ├── ChampionshipService.php
 │       ├── ScoreGeneratorService.php
-│       └── ChampionshipService.php
+│       └── TiebreakResolver.php
 ├── database/
 │   └── migrations/
 ├── docker/
 │   └── nginx/
 │       └── nginx.conf
 ├── routes/
-│   └── api.php
+│   ├── api.php
+│   └── web.php
 ├── tests/
 │   ├── Unit/
 │   └── Feature/
