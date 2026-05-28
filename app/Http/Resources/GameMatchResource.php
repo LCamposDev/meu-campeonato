@@ -11,7 +11,7 @@ class GameMatchResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'phase' => $this->phase,
+            'phase' => $this->phase->value,
             'home_team' => new TeamResource($this->homeTeam),
             'away_team' => new TeamResource($this->awayTeam),
             'home_score' => $this->home_score,
